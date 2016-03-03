@@ -1,1 +1,6 @@
 c:\users\matan\documents\visual studio 2015\Projects\SearchInLog_InterviewQuestions_Q5\SearchInLog_InterviewQuestions_Q5\bin\Debug\SearchInLog_InterviewQuestions_Q5.exe.config
+C:\Users\matan\Documents\Visual Studio 2015\Projects\SearchInLog_InterviewQuestions_Q5\SearchInLog_InterviewQuestions_Q5\obj\Debug\SearchInLog_InterviewQuestions_Q5.csprojResolveAssemblyReference.cache
+C:\Users\matan\Documents\Visual Studio 2015\Projects\SearchInLog_InterviewQuestions_Q5\SearchInLog_InterviewQuestions_Q5\bin\Debug\SearchInLog_InterviewQuestions_Q5.exe
+C:\Users\matan\Documents\Visual Studio 2015\Projects\SearchInLog_InterviewQuestions_Q5\SearchInLog_InterviewQuestions_Q5\bin\Debug\SearchInLog_InterviewQuestions_Q5.pdb
+C:\Users\matan\Documents\Visual Studio 2015\Projects\SearchInLog_InterviewQuestions_Q5\SearchInLog_InterviewQuestions_Q5\obj\Debug\SearchInLog_InterviewQuestions_Q5.exe
+C:\Users\matan\Documents\Visual Studio 2015\Projects\SearchInLog_InterviewQuestions_Q5\SearchInLog_InterviewQuestions_Q5\obj\Debug\SearchInLog_InterviewQuestions_Q5.pdb
