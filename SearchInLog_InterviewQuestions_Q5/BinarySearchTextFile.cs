@@ -31,9 +31,9 @@ namespace SearchInLog_InterviewQuestions_Q5
 		public long Search(string SearchedTemplate, char textFileDelimiter, int positionInDelimitedValues)
 		{
 			// initialized to negative to indicate no real index was found
-			long	returnedPosition	= -1;
-			bool	continueSearch		= true;
-			long	currPosition		= (textFileSize / 2);
+			long    returnedPosition    = -1;
+			bool    continueSearch      = true;
+			long    currPosition        = (textFileSize / 2);
 
 			while (continueSearch)
 			{
@@ -41,44 +41,19 @@ namespace SearchInLog_InterviewQuestions_Q5
 				char    byteCharContents        = (char)0;
 				int     byteContents            = 0;
 
-				long    lowNewlinePosition      = -1;
-				long    highNewlinePosition     = -1;
+				long[]  newlinePositions;
 
-				// Looking for the next and previous '\n'
-				// and parsing the data inbetween
+
+				// Looking for adjacent newline chars, and parsing line
 				using (var fileStream = new FileStream(textFilePath, FileMode.Open))
 				{
+					
+					// Finding neighbouring newlines
+					newlinePositions = FindNewlinePositions(fileStream, currPosition, textFileSize);
 
-					// Looping to find previous newline char
-					for (long i = currPosition; i > 0; i--)
-					{
-
-						fileStream.Position = i;
-						byteContents = fileStream.ReadByte();
-						byteCharContents = (char)byteContents;
-
-						if (byteCharContents.Equals('\n'))
-						{
-							lowNewlinePosition = i;
-							break;
-						}
-					}
-
-
-					// Looping to find next newline char
-					for (long i = currPosition; i < textFileSize; i++)
-					{
-
-						fileStream.Position	= i;
-						byteContents = fileStream.ReadByte();
-						byteCharContents = (char)byteContents;
-
-						if (byteCharContents.Equals('\n'))
-						{
-							highNewlinePosition = i;
-							break;
-						}
-					}
+					// Parsing the line between found indices
+					string[]    values;
+					values = ParseCsvLine(fileStream, newlinePositions[0] + 1, newlinePositions[1] - 1, ',');
 				}
 			}
 
@@ -89,24 +64,68 @@ namespace SearchInLog_InterviewQuestions_Q5
 
 
 		#region STATIC_METHODS
-		//private static long FindNewline(FileStream fs, long startPosition, long endPosition)
-		//{
-		//	long newlinePosition = -1;
+		private static long[] FindNewlinePositions(FileStream fs, long currPosition, long fileSizeBytes)
+		{
+			long[]      newlineIndices      = {-1,-1};
+			int         byteContents;
+			char        byteCharContents;
 
-		//	for (long i = currPosition; i > 0; i--)
-		//	{
-		//		fs.Position = i;
-		//		byteContents = fileStream.ReadByte();
-		//		byteCharContents = (char)byteContents;
-		//		if (byteCharContents.Equals('\n'))
-		//		{
-		//			lowNewlinePosition = i;
-		//			break;
-		//		}
-		//	}
 
-		//	return newlinePosition;
-		//}
+			// Looping to find previous newline char
+			for (long i = currPosition; i > 0; i--)
+			{
+
+				fs.Position = i;
+				byteContents = fs.ReadByte();
+				byteCharContents = (char)byteContents;
+
+				if (byteCharContents.Equals('\n'))
+				{
+					newlineIndices[0] = i;
+					break;
+				}
+			}
+
+
+			// Looping to find next newline char
+			for (long i = currPosition; i < fileSizeBytes; i++)
+			{
+
+				fs.Position = i;
+				byteContents = fs.ReadByte();
+				byteCharContents = (char)byteContents;
+
+				if (byteCharContents.Equals('\n'))
+				{
+					newlineIndices[1] = i;
+					break;
+				}
+			}
+
+			return newlineIndices; 
+		}
+
+		private static string[] ParseCsvLine(FileStream fs, long indexLow, long indexHigh, char delim)
+		{
+			string[]    csvValues;
+			int         currByte;
+			char        currCharByte;
+			char[]      currLineChars		= new char[indexHigh - indexLow];
+			string      currLineString;
+									
+			for (long i = indexLow; i < indexHigh; i++)
+			{
+				fs.Position = i;
+				currByte = fs.ReadByte();
+				currCharByte = (char)currByte;
+				currLineChars[i - indexLow] = currCharByte;
+			}
+
+			currLineString = new String(currLineChars);
+			csvValues = currLineString.Split(delim);
+
+			return csvValues;
+		}
 		#endregion
 	}
 }
