@@ -24,7 +24,7 @@ namespace SearchInLog_InterviewQuestions_Q5
 
 
 		#region METHODS
-		public long Search(string SearchedTemplate, char textFileDelimiter, int positionInDelimitedValues)
+		public long Search(string SearchedTemplate, char textFileDelimiter, int positionInDelimitedValues, bool isEqualToTemplate, long[] rangeToSearch)
 		{
 			// initialized to negative to indicate no real index was found
 			long    returnedPosition    = -1;
@@ -33,9 +33,6 @@ namespace SearchInLog_InterviewQuestions_Q5
 
 			using (var fileStream = new FileStream(textFilePath, FileMode.Open))
 			{
-
-				char    byteCharContents;
-				int     byteContents            = 0;
 
 				long[]  newlinePositions;
 
@@ -130,6 +127,34 @@ namespace SearchInLog_InterviewQuestions_Q5
 			csvValues = currLineString.Split(delim);
 
 			return csvValues;
+		}
+		#endregion
+
+
+		#region PROPERTIES
+		public long TextFileSize
+		{
+			get
+			{
+				return textFileSize;
+			}			
+			set
+			{
+				textFileSize = value;
+			}
+		}
+
+
+		public string TextFilePath
+		{
+			get
+			{
+				return textFilePath;
+			}
+			set
+			{
+				textFilePath = value;
+			}
 		}
 		#endregion
 	}

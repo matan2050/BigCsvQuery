@@ -15,9 +15,10 @@ namespace SearchInLog_InterviewQuestions_Q5
 			char delim = ',';
 			string searchedText = "2013-11-14 11:45:14";
 
-			BinarySearchTextFile bsText = new BinarySearchTextFile(filePath);
+			BinarySearchTextFile bsText			= new BinarySearchTextFile(filePath);
+			long[]               rangeToSearch  = { 0, bsText.TextFileSize };
 
-			long positionInFile = bsText.Search(searchedText, delim, 0);
+			long positionInFile = bsText.Search(searchedText, delim, 0, true, rangeToSearch);
 
 		}
 	}
