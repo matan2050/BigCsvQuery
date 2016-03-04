@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
 
 namespace SearchInLog_InterviewQuestions_Q5
@@ -35,17 +31,17 @@ namespace SearchInLog_InterviewQuestions_Q5
 			bool    continueSearch      = true;
 			long    currPosition        = (textFileSize / 2);
 
-			while (continueSearch)
+			using (var fileStream = new FileStream(textFilePath, FileMode.Open))
 			{
 
-				char    byteCharContents        = (char)0;
+				char    byteCharContents;
 				int     byteContents            = 0;
 
 				long[]  newlinePositions;
 
 
 				// Looking for adjacent newline chars, and parsing line
-				using (var fileStream = new FileStream(textFilePath, FileMode.Open))
+				while (continueSearch)
 				{
 					
 					// Finding neighbouring newlines
@@ -54,10 +50,19 @@ namespace SearchInLog_InterviewQuestions_Q5
 					// Parsing the line between found indices
 					string[]    values;
 					values = ParseCsvLine(fileStream, newlinePositions[0] + 1, newlinePositions[1] - 1, ',');
+
+					if (values[positionInDelimitedValues].Equals(SearchedTemplate))
+					{
+						returnedPosition = newlinePositions[0] + 1;
+						continueSearch = false;
+						break;
+					}
+
+
+					currPosition = (long)Math.Floor((double)currPosition / 2);
 				}
 			}
 
-			currPosition = (long)Math.Floor((double)currPosition / 2);
 			return returnedPosition;
 		}
 		#endregion
