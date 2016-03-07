@@ -11,9 +11,9 @@ namespace SearchInLog_InterviewQuestions_Q5
 		static void Main(string[] args)
 		{
 
-			string filePath = @"C:\Users\matan\Desktop\int\web.log";
+			string filePath = @"C:\Users\User\Desktop\InterviewQuestions\web.log";
 			char delim = ',';
-			string searchedText = "2013-11-14 11:45:14";
+			string searchedText = "2013-11-13 11:45:14";
 
 			BinarySearchTextFile bsText			= new BinarySearchTextFile(filePath);
 			long[]               rangeToSearch  = { 0, bsText.TextFileSize };
