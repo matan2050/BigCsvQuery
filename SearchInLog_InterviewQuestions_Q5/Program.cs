@@ -18,7 +18,7 @@ namespace SearchInLog_InterviewQuestions_Q5
 			BinarySearchTextFile bsText			= new BinarySearchTextFile(filePath);
 			long[]               rangeToSearch  = { 0, bsText.TextFileSize };
 
-			long positionInFile = bsText.Search(searchedText, delim, 0, true, rangeToSearch);
+			long[] positionInFile = bsText.Search(searchedText, delim, 0, rangeToSearch);
 
 		}
 	}
