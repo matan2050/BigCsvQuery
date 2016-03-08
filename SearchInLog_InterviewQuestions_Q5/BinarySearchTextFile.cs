@@ -215,15 +215,7 @@ namespace SearchInLog_InterviewQuestions_Q5
 
             while (continueSearch)
             {
-                if (searchDir == SearchDirection.Forward)
-                {
-                    currPosition = rangeToSearchTemp[0] + (rangeToSearchTemp[1] - rangeToSearchTemp[0]) / 2;
-                }
-                else
-                {
-                    currPosition = rangeToSearchTemp[1] - (rangeToSearchTemp[1] - rangeToSearchTemp[0]) / 2;
-                }
-
+                currPosition = rangeToSearchTemp[1] - (rangeToSearchTemp[1] - rangeToSearchTemp[0]) / 2;
                 newlinePositions = FindNewlinePositions(fs, currPosition, textFileSize);
                 
                 string[]    values;
@@ -235,11 +227,32 @@ namespace SearchInLog_InterviewQuestions_Q5
                 if (currLineTicks < unequalTimeTicks)
                 {
                     rangeToSearchTemp[0] = newlinePositions[0];
+
+                    //if (searchDir == SearchDirection.Forward)
+                    //{
+                    //    rangeToSearchTemp[0] = newlinePositions[1];
+                    //}
+
+                    if (searchDir == SearchDirection.Forward)
+                    {
+                        rangeToSearchTemp[0] = newlinePositions[1];
+                    }
+                    else
+                    {
+                        rangeToSearchTemp[0] = newlinePositions[0];
+                    }
                 }
 
                 if (currLineTicks > unequalTimeTicks)
                 {
-                    rangeToSearchTemp[1] = newlinePositions[0];
+                    if (searchDir == SearchDirection.Forward)
+                    {
+                        rangeToSearchTemp[1] = newlinePositions[1];
+                    }
+                    else
+                    {
+                        rangeToSearchTemp[1] = newlinePositions[0];
+                    }
                 }
 
                 if (currLineTicks == unequalTimeTicks)
@@ -262,16 +275,30 @@ namespace SearchInLog_InterviewQuestions_Q5
                         }
                     }
                 }
-                prevPositionsArchive.Add(newlinePositions[0]);
 
-                //// Fallback
-                //if (prevPositionsArchive.Count > 1)
-                //{
-                //    if (prevPositionsArchive[prevPositionsArchive.Count - 2] == rangeToSearchTemp[0])
-                //    {
-                //        rangeToSearchTemp[0] = newlinePositions[1];
-                //    }
-                //}
+                if (prevPositionsArchive.Count > 1)
+                {
+                    if (prevPositionsArchive[prevPositionsArchive.Count - 2] == newlinePositions[0])
+                    {
+                        if (currLineTicks == unequalTimeTicks)
+                        {
+                            returnedPosition = prevPositionsArchive[prevPositionsArchive.Count - 1];
+                            break;
+                        }
+
+                        if (currLineTicks < unequalTimeTicks)
+                        {
+                            rangeToSearchTemp[1] = newlinePositions[0];
+                        }
+
+                        if (currLineTicks > unequalTimeTicks)
+                        {
+                            rangeToSearchTemp[0] = newlinePositions[1];
+                        }
+                    }
+                }
+
+                prevPositionsArchive.Add(newlinePositions[0]);
             }
 
             return returnedPosition;
