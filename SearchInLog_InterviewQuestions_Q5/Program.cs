@@ -13,12 +13,15 @@ namespace SearchInLog_InterviewQuestions_Q5
 
 			string filePath = @"C:\Users\User\Desktop\InterviewQuestions\web.log";
 			char delim = ',';
-			string searchedText = "2013-11-13 11:45:14";
+			string searchedTextLow = "2013-11-13";
+            string searchedTextHigh = "2013-11-14";
 
 			BinarySearchTextFile bsText			= new BinarySearchTextFile(filePath);
 			long[]               rangeToSearch  = { 0, bsText.TextFileSize };
 
-			long[] positionInFile = bsText.Search(searchedText, delim, 0, rangeToSearch);
+			long[] lowPositionInFile = bsText.Search(searchedTextLow, delim, 0, rangeToSearch);
+
+            long[] highPositionInFile = bsText.Search(searchedTextHigh, delim, 0, rangeToSearch);
 
 		}
 	}
