@@ -4,6 +4,10 @@ using System.Collections.Generic;
 
 namespace SearchInLog_InterviewQuestions_Q5
 {
+    /// <summary>
+    /// BinarySearchTextFile represents a binary search for finding first and last line occurance
+    /// of DateTime string index in a text file
+    /// </summary>
 	public class BinarySearchTextFile
 	{
 		#region FIELDS
@@ -52,13 +56,16 @@ namespace SearchInLog_InterviewQuestions_Q5
                 // getting first found line containing the searched value
                 long    firstObserved = BinarySearch(fileStream, searchedTime, delim, posInCsvValues, searchRange);
 
-                // starting binary search in the latter part of the file
-                long[]  rangeToSearch   = {firstObserved, textFileSize};
-                long    lastValueIndex  = DirectedBinarySearch(fileStream, searchedTime, delim, posInCsvValues, rangeToSearch, SearchDirection.Forward);
+                // two separate binary searches in both ranges divided by 'firstObserved' 
+                long[]  rangeToSearch   = new long[2];
 
                 rangeToSearch[0] = 0;
                 rangeToSearch[1] = firstObserved;
                 long    firstValueIndex = DirectedBinarySearch(fileStream, searchedTime, delim, posInCsvValues, rangeToSearch, SearchDirection.Backward);
+
+                rangeToSearch[0] = firstObserved;
+                rangeToSearch[1] = textFileSize;
+                long    lastValueIndex  = DirectedBinarySearch(fileStream, searchedTime, delim, posInCsvValues, rangeToSearch, SearchDirection.Forward);
 
                 returnedRange[0] = firstValueIndex;
                 returnedRange[1] = lastValueIndex;
@@ -97,10 +104,18 @@ namespace SearchInLog_InterviewQuestions_Q5
 		{
 			long	nextNewlinePos		= -1;
 			bool    continueScan        = true;
-			char	charInCurrentPos;
+			char	charInCurrentPos    = ByteInFileToChar(fs, currPosition);
 
-			long i = currPosition;
-			while (continueScan)
+            if (charInCurrentPos == '\n')
+            {
+                currPosition = (searchDir == SearchDirection.Forward) ? currPosition += 1 : currPosition -= 1;
+            }
+
+            long i = currPosition;
+
+            charInCurrentPos = ByteInFileToChar(fs, i);
+
+            while (continueScan)
 			{
 				charInCurrentPos = ByteInFileToChar(fs, i);
 
@@ -224,7 +239,8 @@ namespace SearchInLog_InterviewQuestions_Q5
 
             long[]          newlinePositions;
             long            currPosition;
-            
+            long            currLineTicks;
+
             while (continueSearch)
             {
                 currPosition = rangeToSearchTemp[1] - (rangeToSearchTemp[1] - rangeToSearchTemp[0]) / 2;
@@ -234,7 +250,7 @@ namespace SearchInLog_InterviewQuestions_Q5
                 values = ParseCsvLine(fs, newlinePositions[0], newlinePositions[1], delim);
 
                 DateTime    currLineTime        = DateTime.Parse(values[posInCsvValues]);
-                long        currLineTicks       = currLineTime.Date.Ticks;
+                currLineTicks = currLineTime.Date.Ticks;
 
                 if (currLineTicks < searchedTimeTicks)
                 {
@@ -256,15 +272,6 @@ namespace SearchInLog_InterviewQuestions_Q5
                     {
                         rangeToSearchTemp[1] = currPosition;
                     }
-                    //if (prevPositionsArchive.Count >= 1)
-                    //{
-                    //    if (prevPositionsArchive[prevPositionsArchive.Count - 1] == rangeToSearchTemp[0])
-                    //    {
-                    //        returnedPosition = rangeToSearchTemp[0];
-                    //        continueSearch = false;
-                    //        break;
-                    //    }
-                    //}
                 }
 
                 if (prevPositionsArchive.Count > 1)
@@ -275,20 +282,26 @@ namespace SearchInLog_InterviewQuestions_Q5
 
                         if (currLineTicks != searchedTimeTicks)
                         {
-							long[] nextLineInDirection = new long[2];
-							nextLineInDirection[0] = FindNextNewline(fs, returnedPosition, searchDir);
-							nextLineInDirection[1] = FindNextNewline(fs, nextLineInDirection[0], searchDir);
-							returnedPosition = (searchDir == SearchDirection.Forward) ? 
-								nextLineInDirection[0] : nextLineInDirection[1];
-						}
+                            long nextLineInDirection;
+
+                            SearchDirection finalSearchDir = (searchDir == SearchDirection.Forward) ? SearchDirection.Backward : SearchDirection.Forward;
+                            nextLineInDirection = FindNextNewline(fs, returnedPosition, finalSearchDir);
+                            returnedPosition = nextLineInDirection;
+                        }
                         break;
                     }
                 }
-
                 prevPositionsArchive.Add(newlinePositions[0]);
             }
 
-            
+            // if we've converged on a record and its wrong, get next line
+            //if (currLineTicks != searchedTimeTicks)
+            //{
+            //    if (searchDir == SearchDirection.Forward)
+            //    {
+            //        newlineIndices[1] = FindNextNewline(fs, currPosition, SearchDirection.Forward);
+            //    }
+            //}
 
             return returnedPosition;
         }
