@@ -31,7 +31,16 @@ namespace SearchInLog_InterviewQuestions_Q5
 
 
         #region PUBLIC_METHODS
-        public long[] Search(string searchedTemplate, char textFileDelimiter, int posInCsvValues, long[] searchRange)
+        /// <summary>
+        /// Search returns an array containing the byte position in the file,
+        /// in which the searched value appears first and last
+        /// </summary>
+        /// <param name="searchedTemplate">DateTime representing single date</param>
+        /// <param name="textFileDelimiter">Csv delimiter character</param>
+        /// <param name="posInCsvValues">Location of the relevant value for searching in the csv line</param>
+        /// <param name="searchRange">Upper and lower bound searching</param>
+        /// <returns></returns>
+        public long[] Search(string searchedTemplate, char delim, int posInCsvValues, long[] searchRange)
         {
             // initialized to negative to indicate no real index was found
             long[]      returnedRange       = new long[2];
@@ -40,19 +49,16 @@ namespace SearchInLog_InterviewQuestions_Q5
 
             using (var fileStream = new FileStream(textFilePath, FileMode.Open))
             {
-                long firstValueInstance = BinarySearchEquality(fileStream, searchedTime, textFileDelimiter, posInCsvValues, searchRange);
+                // getting first found line containing the searched value
+                long    firstObserved = BinarySearch(fileStream, searchedTime, delim, posInCsvValues, searchRange);
 
-                // TODO:    ADD ADDITIONAL BINARY SEARCHES FOR THE LAST AND FIRST
-                //          INSTANCES OF THE DESIRED DATE 
-                //currPosition = (long)Math.Floor((double)currPosition / 2);
-                long[] rangeToSearch = new long[2];
-                rangeToSearch[0] = firstValueInstance;
-                rangeToSearch[1] = textFileSize;
-                long lastValueIndex = BinarySearchInequality(fileStream, searchedTime, textFileDelimiter, posInCsvValues, rangeToSearch, SearchDirection.Forward);
+                // starting binary search in the latter part of the file
+                long[]  rangeToSearch   = {firstObserved, textFileSize};
+                long    lastValueIndex  = BinarySearchDirected(fileStream, searchedTime, delim, posInCsvValues, rangeToSearch, SearchDirection.Forward);
 
                 rangeToSearch[0] = 0;
-                rangeToSearch[1] = firstValueInstance;
-                long firstValueIndex = BinarySearchInequality(fileStream, searchedTime, textFileDelimiter, posInCsvValues, rangeToSearch, SearchDirection.Backward);
+                rangeToSearch[1] = firstObserved;
+                long    firstValueIndex = BinarySearchDirected(fileStream, searchedTime, delim, posInCsvValues, rangeToSearch, SearchDirection.Backward);
 
                 returnedRange[0] = firstValueIndex;
                 returnedRange[1] = lastValueIndex;
@@ -156,7 +162,7 @@ namespace SearchInLog_InterviewQuestions_Q5
             return (char)byteContents;
         }
 
-        private long BinarySearchEquality(FileStream fs, DateTime searchedTime, char textFileDelimiter, int posInCsvValues, long[] rangeToSearch)
+        private long BinarySearch(FileStream fs, DateTime searchedTime, char delim, int posInCsvValues, long[] rangeToSearch)
         {
             long[]      newlinePositions;
 
@@ -168,13 +174,9 @@ namespace SearchInLog_InterviewQuestions_Q5
 
             while (continueSearch)
             {
-                // Finding neighbouring newlines
                 newlinePositions = FindNewlinePositions(fs, currPosition, textFileSize);
 
-                // Parsing the line between found indices
-                string[]    values;
-                values = ParseCsvLine(fs, newlinePositions[0] + 1, newlinePositions[1] - 1, ',');
-
+                string[]    values          = ParseCsvLine(fs, newlinePositions[0] + 1, newlinePositions[1] - 1, delim);
                 DateTime    currLineTime    = DateTime.Parse(values[posInCsvValues]);
                 long        currLineTicks   = currLineTime.Date.Ticks;
 
@@ -199,107 +201,77 @@ namespace SearchInLog_InterviewQuestions_Q5
             return returnedPosition;
         }
 
-        private long BinarySearchInequality(FileStream fs, DateTime unequalToTime, char textFileDelimiter, int posInCsvValues, long[] rangeToSearch, SearchDirection searchDir)
+        private long BinarySearchDirected(FileStream fs, DateTime searchedTime, char delim, int posInCsvValues, long[] rangeToSearch, SearchDirection searchDir)
         {
             long            returnedPosition        = -1;
-
             List<long>      prevPositionsArchive    = new List<long>();
-
             long[]          rangeToSearchTemp       = rangeToSearch;
-            long[]          newlinePositions;
-
-            long            currPosition;
+            long            searchedTimeTicks       = searchedTime.Date.Ticks;
             bool            continueSearch          = true;
 
-            long            unequalTimeTicks        = unequalToTime.Date.Ticks;
-
+            long[]          newlinePositions;
+            long            currPosition;
+            
             while (continueSearch)
             {
                 currPosition = rangeToSearchTemp[1] - (rangeToSearchTemp[1] - rangeToSearchTemp[0]) / 2;
                 newlinePositions = FindNewlinePositions(fs, currPosition, textFileSize);
                 
                 string[]    values;
-                values = ParseCsvLine(fs, newlinePositions[0], newlinePositions[1], textFileDelimiter);
+                values = ParseCsvLine(fs, newlinePositions[0], newlinePositions[1], delim);
 
                 DateTime    currLineTime        = DateTime.Parse(values[posInCsvValues]);
                 long        currLineTicks       = currLineTime.Date.Ticks;
 
-                if (currLineTicks < unequalTimeTicks)
+                if (currLineTicks < searchedTimeTicks)
                 {
-                    rangeToSearchTemp[0] = newlinePositions[0];
+                    rangeToSearchTemp[0] = currPosition;
+                }
 
-                    //if (searchDir == SearchDirection.Forward)
+                if (currLineTicks > searchedTimeTicks)
+                {
+                    rangeToSearchTemp[1] = currPosition;
+                }
+
+                if (currLineTicks == searchedTimeTicks)
+                {
+                    if (searchDir == SearchDirection.Forward)
+                    {
+                        rangeToSearchTemp[0] = currPosition;
+                    }
+                    else
+                    {
+                        rangeToSearchTemp[1] = currPosition;
+                    }
+                    //if (prevPositionsArchive.Count >= 1)
                     //{
-                    //    rangeToSearchTemp[0] = newlinePositions[1];
+                    //    if (prevPositionsArchive[prevPositionsArchive.Count - 1] == rangeToSearchTemp[0])
+                    //    {
+                    //        returnedPosition = rangeToSearchTemp[0];
+                    //        continueSearch = false;
+                    //        break;
+                    //    }
                     //}
-
-                    if (searchDir == SearchDirection.Forward)
-                    {
-                        rangeToSearchTemp[0] = newlinePositions[1];
-                    }
-                    else
-                    {
-                        rangeToSearchTemp[0] = newlinePositions[0];
-                    }
-                }
-
-                if (currLineTicks > unequalTimeTicks)
-                {
-                    if (searchDir == SearchDirection.Forward)
-                    {
-                        rangeToSearchTemp[1] = newlinePositions[1];
-                    }
-                    else
-                    {
-                        rangeToSearchTemp[1] = newlinePositions[0];
-                    }
-                }
-
-                if (currLineTicks == unequalTimeTicks)
-                {
-                    if (searchDir == SearchDirection.Forward)
-                    {   
-                        rangeToSearchTemp[0] = newlinePositions[0];
-                    }
-                    else
-                    {
-                        rangeToSearchTemp[1] = newlinePositions[0];
-                    }
-                    if (prevPositionsArchive.Count >= 1)
-                    {
-                        if (prevPositionsArchive[prevPositionsArchive.Count - 1] == rangeToSearchTemp[0])
-                        {
-                            returnedPosition = rangeToSearchTemp[0];
-                            continueSearch = false;
-                            break;
-                        }
-                    }
                 }
 
                 if (prevPositionsArchive.Count > 1)
                 {
-                    if (prevPositionsArchive[prevPositionsArchive.Count - 2] == newlinePositions[0])
+                    if (prevPositionsArchive[prevPositionsArchive.Count - 1] == newlinePositions[0])
                     {
-                        if (currLineTicks == unequalTimeTicks)
-                        {
-                            returnedPosition = prevPositionsArchive[prevPositionsArchive.Count - 1];
-                            break;
-                        }
+                        returnedPosition = prevPositionsArchive[prevPositionsArchive.Count - 1];
 
-                        if (currLineTicks < unequalTimeTicks)
+                        if (currLineTicks != searchedTimeTicks)
                         {
-                            rangeToSearchTemp[1] = newlinePositions[0];
+                            
                         }
-
-                        if (currLineTicks > unequalTimeTicks)
-                        {
-                            rangeToSearchTemp[0] = newlinePositions[1];
-                        }
+                        break;
                     }
                 }
 
                 prevPositionsArchive.Add(newlinePositions[0]);
             }
+
+            
 
             return returnedPosition;
         }
