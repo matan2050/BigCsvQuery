@@ -54,11 +54,11 @@ namespace SearchInLog_InterviewQuestions_Q5
 
                 // starting binary search in the latter part of the file
                 long[]  rangeToSearch   = {firstObserved, textFileSize};
-                long    lastValueIndex  = BinarySearchDirected(fileStream, searchedTime, delim, posInCsvValues, rangeToSearch, SearchDirection.Forward);
+                long    lastValueIndex  = DirectedBinarySearch(fileStream, searchedTime, delim, posInCsvValues, rangeToSearch, SearchDirection.Forward);
 
                 rangeToSearch[0] = 0;
                 rangeToSearch[1] = firstObserved;
-                long    firstValueIndex = BinarySearchDirected(fileStream, searchedTime, delim, posInCsvValues, rangeToSearch, SearchDirection.Backward);
+                long    firstValueIndex = DirectedBinarySearch(fileStream, searchedTime, delim, posInCsvValues, rangeToSearch, SearchDirection.Backward);
 
                 returnedRange[0] = firstValueIndex;
                 returnedRange[1] = lastValueIndex;
@@ -79,44 +79,60 @@ namespace SearchInLog_InterviewQuestions_Q5
         /// <returns></returns>
 		private long[] FindNewlinePositions(FileStream fs, long currPosition, long fileSizeBytes)
 		{
-			long[]      newlineIndices      = {-1,-1};
-			char        byteCharContents;
+			long[]      newlineIndices      = new long[2];
 
-
-            // Check if we didn't land exactly on a newline character
-            byteCharContents = ByteInFileToChar(fs, currPosition);
-            if (byteCharContents == '\n')
-            {
-                currPosition += 1;
-            }
-
-            // Looping to find previous newline char
-            for (long i = currPosition; i >= 0; i--)
+			if (ByteInFileToChar(fs, currPosition) == '\n')
 			{
-
-                byteCharContents = ByteInFileToChar(fs, i);
-
-                if ((byteCharContents.Equals('\n')) || (i == 0))
-				{
-					newlineIndices[0] = i;
-					break;
-				}
+				currPosition++;
 			}
 
-			// Looping to find next newline char
-			for (long i = currPosition; i <= fileSizeBytes; i++)
-			{
 
-                byteCharContents = ByteInFileToChar(fs, i);
-
-                if ((byteCharContents.Equals('\n')) || (i == fileSizeBytes))
-				{
-					newlineIndices[1] = i;
-					break;
-				}
-			}
+			newlineIndices[0] = FindNextNewline(fs, currPosition, SearchDirection.Backward);
+			newlineIndices[1] = FindNextNewline(fs, currPosition, SearchDirection.Forward);
 
 			return newlineIndices; 
+		}
+
+		private long FindNextNewline(FileStream fs, long currPosition, SearchDirection searchDir)
+		{
+			long	nextNewlinePos		= -1;
+			bool    continueScan        = true;
+			char	charInCurrentPos;
+
+			long i = currPosition;
+			while (continueScan)
+			{
+				charInCurrentPos = ByteInFileToChar(fs, i);
+
+				if (charInCurrentPos == '\n')
+				{ 
+					// check if we are not starting in a newline (@currPosition)
+					nextNewlinePos = i;
+					continueScan = false;
+					break;
+				}
+
+				if (searchDir == SearchDirection.Forward)
+				{
+					i++;
+					if (i == textFileSize)
+					{
+						nextNewlinePos = i;
+						continueScan = false;
+					}
+				}
+				else
+				{
+					i--;
+					if (i == 0)
+					{
+						nextNewlinePos = i;
+						continueScan = false;
+					}
+				}
+				
+			}
+			return nextNewlinePos;
 		}
 
         /// <summary>
@@ -130,16 +146,13 @@ namespace SearchInLog_InterviewQuestions_Q5
 		private string[] ParseCsvLine(FileStream fs, long indexLow, long indexHigh, char delim)
 		{
 			string[]    csvValues;
-			int         currByte;
 			char        currCharByte;
 			char[]      currLineChars		= new char[indexHigh - indexLow];
 			string      currLineString;
 									
 			for (long i = indexLow; i < indexHigh; i++)
 			{
-				fs.Position = i;
-				currByte = fs.ReadByte();
-				currCharByte = (char)currByte;
+				currCharByte = ByteInFileToChar(fs, i);
 				currLineChars[i - indexLow] = currCharByte;
 			}
 
@@ -176,7 +189,7 @@ namespace SearchInLog_InterviewQuestions_Q5
             {
                 newlinePositions = FindNewlinePositions(fs, currPosition, textFileSize);
 
-                string[]    values          = ParseCsvLine(fs, newlinePositions[0] + 1, newlinePositions[1] - 1, delim);
+                string[]    values          = ParseCsvLine(fs, newlinePositions[0] + 1, newlinePositions[1], delim);
                 DateTime    currLineTime    = DateTime.Parse(values[posInCsvValues]);
                 long        currLineTicks   = currLineTime.Date.Ticks;
 
@@ -201,7 +214,7 @@ namespace SearchInLog_InterviewQuestions_Q5
             return returnedPosition;
         }
 
-        private long BinarySearchDirected(FileStream fs, DateTime searchedTime, char delim, int posInCsvValues, long[] rangeToSearch, SearchDirection searchDir)
+        private long DirectedBinarySearch(FileStream fs, DateTime searchedTime, char delim, int posInCsvValues, long[] rangeToSearch, SearchDirection searchDir)
         {
             long            returnedPosition        = -1;
             List<long>      prevPositionsArchive    = new List<long>();
@@ -262,8 +275,12 @@ namespace SearchInLog_InterviewQuestions_Q5
 
                         if (currLineTicks != searchedTimeTicks)
                         {
-                            
-                        }
+							long[] nextLineInDirection = new long[2];
+							nextLineInDirection[0] = FindNextNewline(fs, returnedPosition, searchDir);
+							nextLineInDirection[1] = FindNextNewline(fs, nextLineInDirection[0], searchDir);
+							returnedPosition = (searchDir == SearchDirection.Forward) ? 
+								nextLineInDirection[0] : nextLineInDirection[1];
+						}
                         break;
                     }
                 }

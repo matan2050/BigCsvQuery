@@ -11,10 +11,10 @@ namespace SearchInLog_InterviewQuestions_Q5
 		static void Main(string[] args)
 		{
 
-			string filePath = @"C:\Users\User\Desktop\InterviewQuestions\web.log";
+			string filePath = @"C:\Temp\weblog_sim.log";
 			char delim = ',';
-			string searchedTextLow = "2013-11-13";
-            string searchedTextHigh = "2013-11-14";
+			string searchedTextLow = "2016-03-11";
+            string searchedTextHigh = "2013-03-14";
 
 			BinarySearchTextFile bsText			= new BinarySearchTextFile(filePath);
 			long[]               rangeToSearch  = { 0, bsText.TextFileSize };
