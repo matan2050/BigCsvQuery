@@ -25,7 +25,18 @@ namespace SearchInLog_InterviewQuestions_Q5
 
             BinarySearchTextFile    bsText              = new BinarySearchTextFile(filePath);
             long[]                  lowerRange          = bsText.Search(startDate, ',', 0);
+
+			if (lowerRange[0] == -1)
+			{
+				lowerRange[0] = 0;
+			}
+
             long[]                  upperRange          = bsText.Search(endDate, ',', 0);
+
+			if (upperRange[1] == -1)
+			{
+				upperRange[1] = 0;
+			}
             long[]                  outputRange         = {lowerRange[0], upperRange[1]};
 
             //long                    currCursor          = outputRange[0];

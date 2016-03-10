@@ -61,6 +61,13 @@ namespace SearchInLog_InterviewQuestions_Q5
             {
                 // getting first found line containing the searched value
                 long    firstObserved = BinarySearch(fileStream, searchedTime, delim, posInCsvValues, initialSearchRange);
+				
+				if (firstObserved == -1)
+				{
+					returnedRange[0] = -1;
+					returnedRange[1] = -1;
+					return returnedRange;
+				}
 
                 // two separate binary searches in both ranges divided by 'firstObserved' 
                 long[]  rangeToSearch   = new long[2];
@@ -259,6 +266,12 @@ namespace SearchInLog_InterviewQuestions_Q5
                 {
                     currPosition = (long)(currPosition / 2);
                 }
+
+				// exit statement if value not found
+				if (currPosition >= TextFileSize)
+				{
+					return -1;
+				}
             }
 
             return returnedPosition;
