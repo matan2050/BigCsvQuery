@@ -32,28 +32,9 @@ namespace SearchInLog_InterviewQuestions_Q5
 
             using (var fs = new FileStream(filePath, FileMode.Open))
             {
-                byte[]  matchingBytes = new byte[outputRange[1] - outputRange[0]];
-                fs.Read(matchingBytes, (int)outputRange[0], (int)(outputRange[1] - outputRange[0]));
-
-                string result = System.Text.Encoding.UTF8.GetString(matchingBytes);
-
-                Console.Write(result);
-            }
-
-
-
-
-            //string filePath = @"C:\Users\User\Desktop\InterviewQuestions\weblog_sim.log";
-            //char delim = ',';
-            //string searchedTextLow = "2016-3-19";
-            //string searchedTextHigh = "2016-3-28";
-
-            //BinarySearchTextFile bsText			= new BinarySearchTextFile(filePath);
-
-            //long[] lowPositionInFile = bsText.Search(searchedTextLow, delim, 0);
-
-            //         long[] highPositionInFile = bsText.Search(searchedTextHigh, delim, 0);
-
+				string output = bsText.FileContentsRange(fs, outputRange[0], outputRange[1]);
+				Console.Write(output);
+			}
         }
 	}
 }
