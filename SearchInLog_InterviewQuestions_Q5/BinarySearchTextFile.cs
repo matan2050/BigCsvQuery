@@ -154,10 +154,35 @@ namespace SearchInLog_InterviewQuestions_Q5
             }
 
             currLineString = new String(currLineChars);
-            csvValues = currLineString.Split(delim);
+			currLineString = currLineString.Trim('\n');
+		csvValues = currLineString.Split(delim);
 
             return csvValues;
         }
+
+		public string FileContentsRange(FileStream fs, long indexLow, long indexHigh)
+		{
+			string returnedString = "";
+
+			long currPosition = indexLow;
+
+			while (currPosition < indexHigh)
+			{
+				long[]		currNewlineIndex		= FindNewlinePositions(fs, currPosition, TextFileSize);
+				string[]	lineValues				= ParseCsvLine(fs, currNewlineIndex[0], currNewlineIndex[1], ',');
+
+				for (int i = 0; i < lineValues.Length; i++)
+				{
+					returnedString += lineValues[i];
+					returnedString = (i == (lineValues.Length - 1)) ?
+						returnedString + '\n' : returnedString + ',';
+
+					currPosition = currNewlineIndex[1] + 1;
+				}					
+			}
+
+			return returnedString;
+		}
         #endregion
 
 
@@ -289,19 +314,27 @@ namespace SearchInLog_InterviewQuestions_Q5
                     if (prevPositionsArchive[prevPositionsArchive.Count - 1] == newlinePositions[0])
                     {
                         returnedPosition = prevPositionsArchive[prevPositionsArchive.Count - 1];
+						continueSearch = false;
 
-                        if (currLineTicks != searchedTimeTicks)
+						if (currLineTicks != searchedTimeTicks)
                         {
                             long nextLineInDirection;
 
+							// Propogating index to next newline if we are in a wrong value-line
                             SearchDirection finalSearchDir = (searchDir == SearchDirection.Forward) ? SearchDirection.Backward : SearchDirection.Forward;
                             nextLineInDirection = FindNextNewline(fs, returnedPosition, finalSearchDir);
                             returnedPosition = nextLineInDirection;
-                        }
-                        break;
+						}
+
+						if (searchDir == SearchDirection.Forward)
+						{
+							returnedPosition = (returnedPosition == -1) ?
+								textFileSize : FindNextNewline(fs, returnedPosition, searchDir);
+						}
                     }
                 }
-                prevPositionsArchive.Add(newlinePositions[0]);
+
+				prevPositionsArchive.Add(newlinePositions[0]);
             }
 
             return returnedPosition;
