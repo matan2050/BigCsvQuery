@@ -50,10 +50,10 @@ namespace SearchInLog_InterviewQuestions_Q5
         /// <param name="posInCsvValues">Location of the relevant value for searching in the csv line</param>
         /// <param name="searchRange">Upper and lower bound searching</param>
         /// <returns></returns>
-        public long[] Search(string searchedTemplate, char delim, int posInCsvValues)
+        public List<long> Search(string searchedTemplate, char delim, int posInCsvValues)
         {
             // initialized to negative to indicate no real index was found
-            long[]      returnedRange       = new long[2];
+            List<long>  returnedRange       = new List<long>(2);
             long        currPosition        = (long)(textFileSize / 2);
             DateTime    searchedTime        = DateTime.Parse(searchedTemplate);
 
@@ -64,8 +64,6 @@ namespace SearchInLog_InterviewQuestions_Q5
 				
 				if (firstObserved == -1)
 				{
-					returnedRange[0] = -1;
-					returnedRange[1] = -1;
 					return returnedRange;
 				}
 
@@ -82,8 +80,15 @@ namespace SearchInLog_InterviewQuestions_Q5
 
                 long    lastValueIndex  = DirectedBinarySearch(fileStream, searchedTime, delim, posInCsvValues, rangeToSearch, SearchDirection.Forward);
 
-                returnedRange[0] = firstValueIndex;
-                returnedRange[1] = lastValueIndex;
+                if (firstValueIndex >= 0)
+                {
+                    returnedRange.Add(firstValueIndex);
+                }
+
+                if (lastValueIndex > 0)
+                {
+                    returnedRange.Add(lastValueIndex);
+                }
             }
 
             return returnedRange;
