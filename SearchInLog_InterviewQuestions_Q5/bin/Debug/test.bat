@@ -1,1 +1,0 @@
-"C:\Users\User\Documents\Visual Studio 2015\Projects\SearchInLog_InterviewQuestion_5\SearchInLog_InterviewQuestions_Q5\bin\Debug\SearchInLog_InterviewQuestions_Q5.exe" "C:\Users\User\Desktop\InterviewQuestions\web.log" "2013-11-14" "2013-11-15"

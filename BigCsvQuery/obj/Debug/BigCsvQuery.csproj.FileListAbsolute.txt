@@ -1,0 +1,6 @@
+C:\Users\matan\Documents\Visual Studio 2015\Projects\BigCsvQuery\BigCsvQuery\bin\Debug\SearchInLog_InterviewQuestions_Q5.exe.config
+C:\Users\matan\Documents\Visual Studio 2015\Projects\BigCsvQuery\BigCsvQuery\obj\Debug\SearchInLog_InterviewQuestions_Q5.exe
+C:\Users\matan\Documents\Visual Studio 2015\Projects\BigCsvQuery\BigCsvQuery\obj\Debug\SearchInLog_InterviewQuestions_Q5.pdb
+C:\Users\matan\Documents\Visual Studio 2015\Projects\BigCsvQuery\BigCsvQuery\bin\Debug\SearchInLog_InterviewQuestions_Q5.exe
+C:\Users\matan\Documents\Visual Studio 2015\Projects\BigCsvQuery\BigCsvQuery\bin\Debug\SearchInLog_InterviewQuestions_Q5.pdb
+C:\Users\matan\Documents\Visual Studio 2015\Projects\BigCsvQuery\BigCsvQuery\obj\Debug\BigCsvQuery.csprojResolveAssemblyReference.cache
